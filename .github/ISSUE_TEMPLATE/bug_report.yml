@@ -1,0 +1,46 @@
+name: Bug report
+description: The PDF looks different from the browser, a conversion fails, or the package misbehaves
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! The quickest fix comes from a small HTML document that shows the problem.
+        Please remove anything private from it. For security issues, use the private report described in SECURITY.md instead.
+  - type: textarea
+    id: html
+    attributes:
+      label: HTML (and CSS) that shows the problem
+      description: As small as possible. Attach images or files if they matter.
+      render: html
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: PHP code and options
+      render: php
+      placeholder: |
+        $pdf = new Html2Pdf(['viewportWidth' => 1280]);
+        $pdf->loadHtml($html)->render();
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected and what you got
+      description: Screenshots of the browser and of the PDF help a lot.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: PHP version and operating system
+      placeholder: "PHP 8.3, Ubuntu 24.04 x64"
+    validations:
+      required: true

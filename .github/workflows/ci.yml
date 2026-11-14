@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # must match the toolchain in converter/go.mod (scripts/check-versions.sh checks it)
+  GO_VERSION: '1.27.3'
+
+jobs:
+  converter:
+    name: Converter (Go)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: converter/go.mod
+      - name: gofmt
+        working-directory: converter
+        run: test -z "$(gofmt -l . | tee /dev/stderr)"
+      - name: go vet
+        working-directory: converter
+        run: go vet ./...
+      - name: go test
+        working-directory: converter
+        run: go test ./...
+      - name: Versions agree
+        run: sh scripts/check-versions.sh
+
+  php:
+    name: PHP ${{ matrix.php }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        php: ['7.4', '8.1', '8.4']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: converter/go.mod
+      - name: Build the converter for this machine
+        run: sh scripts/build-binaries.sh --host
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring
+          coverage: none
+          tools: composer:v2
+      - name: Install dependencies
+        run: composer update --no-interaction --no-progress --prefer-dist
+      - name: Tests
+        run: vendor/bin/phpunit
+        env:
+          HTML2PDF_NO_DOWNLOAD: '1' # use the binary built above, never a download
+
+  static-analysis:
+    name: PHPStan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+      - run: composer update --no-interaction --no-progress --prefer-dist
+      - run: composer analyse

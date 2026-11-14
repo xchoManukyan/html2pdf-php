@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Invoice INV-2026-0147</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11pt; color: #222; }
+  h1 { color: #2f6fed; margin-bottom: 4px; }
+  .muted { color: #777; }
+  .box { background: #f4f6fb; border-left: 4px solid #2f6fed; padding: 8px 12px; margin: 14px 0; }
+  table.items { width: 100%; }
+  table.items th { background: #2f6fed; color: #fff; padding: 6px; text-align: left; }
+  table.items td { border-bottom: 1px solid #ddd; padding: 6px; }
+  .num { text-align: right; }
+  .total td { font-weight: bold; background: #eef3ff; }
+  pre { background: #f7f7f7; border: 1px solid #e3e3e3; padding: 8px; font-size: 9pt; }
+</style>
+</head>
+<body>
+  <h1>Invoice INV-2026-0147</h1>
+  <p class="muted">Issued 14 November 2026 &middot; Due 14 December 2026</p>
+
+  <table style="width:100%">
+    <tr>
+      <td valign="top"><b>From</b><br>Acme Studio LLC<br>12 Market Street<br>Yerevan, Armenia</td>
+      <td valign="top" align="right"><b>Bill to</b><br>Northwind Traders<br>45 Harbour Road<br>Dublin, Ireland</td>
+    </tr>
+  </table>
+
+  <div class="box">Thank you for your business! Payment terms are <u>30 days</u>. Questions? Visit
+    <a href="https://example.com/help">example.com/help</a>.</div>
+
+  <table class="items">
+    <thead>
+      <tr><th>#</th><th>Description</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Website redesign &mdash; discovery &amp; wireframes</td><td class="num">1</td><td class="num">€1,200.00</td><td class="num">€1,200.00</td></tr>
+      <tr><td>2</td><td>Frontend development (Vue 3, responsive layout, accessibility review)</td><td class="num">40</td><td class="num">€65.00</td><td class="num">€2,600.00</td></tr>
+      <tr><td>3</td><td>Hosting setup</td><td class="num">1</td><td class="num">€150.00</td><td class="num">€150.00</td></tr>
+      <tr class="total"><td colspan="4" class="num">Total due</td><td class="num">€3,950.00</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Notes</h2>
+  <ol>
+    <li>Bank transfer reference: <code>INV-2026-0147</code></li>
+    <li>Late payments incur a <strong>2%</strong> monthly fee.
+      <ul>
+        <li>Grace period: 5 days</li>
+        <li>Reminders are sent by e-mail</li>
+      </ul>
+    </li>
+    <li>All prices include VAT where applicable.</li>
+  </ol>
+
+  <p style="text-align: justify">This paragraph is justified to show how long text wraps across the full
+  width of the page. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+  incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+  laboris nisi ut aliquip ex ea commodo consequat. Café, naïve, Straße, “smart quotes” – dashes — and … ellipsis.</p>
+
+  <blockquote><i>“Simplicity is prerequisite for reliability.”</i> &mdash; Edsger W. Dijkstra</blockquote>
+
+  <pre>func main() {
+    fmt.Println("Hello, PDF!")
+}</pre>
+  <hr>
+  <p class="muted" style="font-size: 9pt; text-align:center">Acme Studio LLC &middot; VAT AM-123456 &middot; hello@acme.example</p>
+</body>
+</html>

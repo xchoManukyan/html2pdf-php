@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CSS Grid</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; font-size: 9.5pt; color: #1f2937; }
+  h2 { font-size: 11.5pt; margin: 14px 0 6px; }
+
+  .page { display: grid; gap: 8px;
+          grid-template-columns: 120px 1fr 140px;
+          grid-template-rows: auto 1fr auto;
+          grid-template-areas: "head head head" "nav main aside" "foot foot foot"; }
+  .page > * { padding: 8px 10px; border-radius: 6px; }
+  .head { grid-area: head; background: #1e293b; color: white; font-weight: 600; font-size: 12pt; }
+  .nav { grid-area: nav; background: #e0e7ff; }
+  .main { grid-area: main; background: #f8fafc; border: 1px solid #e2e8f0; }
+  .aside { grid-area: aside; background: #fef3c7; }
+  .foot { grid-area: foot; background: #f1f5f9; color: #64748b; text-align: center; }
+  .nav ul { margin: 0; padding-left: 14px; }
+
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .gallery div { height: 54px; border-radius: 8px; color: white; font-weight: 600; padding: 6px 8px;
+                 background: linear-gradient(135deg, #6366f1, #a855f7); }
+  .gallery div:nth-child(3n) { background: linear-gradient(135deg, #0ea5e9, #22c55e); }
+  .gallery div:nth-child(4n) { background: linear-gradient(135deg, #f97316, #ef4444); }
+
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: 40px; gap: 6px; grid-auto-flow: row dense; }
+  .bento div { background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 6px; padding: 4px 6px; font-size: 8.5pt; }
+  .b1 { grid-column: span 6; grid-row: span 2; background: #cffafe !important; }
+  .b2 { grid-column: span 3; }
+  .b3 { grid-column: span 3; grid-row: span 2; }
+  .b4 { grid-column: span 3; }
+  .b5 { grid-column: 1 / -1; text-align: center; }
+  .b6 { grid-column: span 4; }
+  .b7 { grid-column: span 8; }
+
+  .center { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 60px; gap: 6px; place-items: center; }
+  .center div { background: #fde68a; padding: 4px 10px; border-radius: 999px; }
+  .center div:nth-child(2) { justify-self: start; } .center div:nth-child(3) { align-self: end; }
+  .center div:nth-child(4) { place-self: stretch; text-align: center; border-radius: 6px; }
+
+  .mixed { display: grid; grid-template-columns: fit-content(140px) minmax(100px, 1fr) max-content; gap: 6px; margin-top: 4px; }
+  .mixed div { border: 1px dashed #94a3b8; padding: 4px 6px; }
+</style>
+</head>
+<body>
+  <h2>1. Page layout with grid-template-areas</h2>
+  <div class="page">
+    <div class="head">Dashboard · grid areas</div>
+    <nav class="nav"><b>Menu</b><ul><li>Overview</li><li>Reports</li><li>Settings</li></ul></nav>
+    <main class="main"><b>Main content</b><br>The middle track is <code>1fr</code>: it takes the space left by the 120px navigation
+      and 140px aside. Header and footer span all three columns by area name.</main>
+    <aside class="aside"><b>Aside</b><br>Notes, tips or ads.</aside>
+    <div class="foot">footer spans "foot foot foot"</div>
+  </div>
+
+  <h2>2. Gallery: repeat(auto-fill, minmax(110px, 1fr))</h2>
+  <div class="gallery"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div>
+
+  <h2>3. Bento grid: 12 columns, spans, dense flow</h2>
+  <div class="bento">
+    <div class="b1">b1 · span 6 × 2 rows</div><div class="b2">b2 · span 3</div><div class="b3">b3 · 3 × 2</div>
+    <div class="b4">b4 · span 3</div><div class="b5">b5 · grid-column: 1 / -1</div>
+    <div class="b6">b6 · span 4</div><div class="b7">b7 · span 8</div>
+  </div>
+
+  <h2>4. Alignment: place-items center, justify-self, align-self, place-self</h2>
+  <div class="center"><div>center</div><div>start</div><div>end</div><div>stretch</div></div>
+
+  <h2>5. fit-content(), minmax() and max-content tracks</h2>
+  <div class="mixed"><div>fit-content(140px) wraps this longer text</div><div>minmax(100px, 1fr)</div><div>max-content</div></div>
+</body>
+</html>

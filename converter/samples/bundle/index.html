@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Quarterly report</title>
+<meta name="author" content="Acme Analytics">
+<meta name="description" content="dompdf-style features demo">
+<link rel="stylesheet" href="css/report.css">
+</head>
+<body>
+  <img class="logo" src="img/logo.svg" alt="Acme logo">
+  <h1>Quarterly report</h1>
+  <p class="toc">Contents: <a href="#chart">1. Revenue chart</a> · <a href="#highlights">2. Highlights</a> · <a href="#form">3. Order form</a></p>
+
+  <h2 id="chart">1. Revenue chart (inline SVG)</h2>
+  <svg class="chart" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
+    <style>.bar { fill: #6366f1 } .bar.hi { fill: #ec4899 } text { font: 10px Arial; fill: #6b7280 }</style>
+    <line x1="30" y1="140" x2="390" y2="140" stroke="#d1d5db"/>
+    <g>
+      <rect class="bar" x="50" y="80" width="40" height="60" rx="4"/>
+      <rect class="bar" x="120" y="60" width="40" height="80" rx="4"/>
+      <rect class="bar hi" x="190" y="25" width="40" height="115" rx="4"/>
+      <rect class="bar" x="260" y="50" width="40" height="90" rx="4"/>
+      <polyline points="70,75 140,55 210,20 280,45 350,30" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="350" cy="30" r="5" fill="#f59e0b"/>
+    </g>
+    <text x="58" y="155">Q1</text><text x="128" y="155">Q2</text><text x="198" y="155">Q3</text><text x="268" y="155">Q4</text>
+    <text x="320" y="20">target</text>
+  </svg>
+
+  <h2 id="highlights">2. Highlights (list-style-image)</h2>
+  <ul class="checks"><li>Revenue up 12% year over year</li><li>Three new markets opened</li><li>Customer churn below 2%</li></ul>
+  <p style="break-before: page">This section starts on a new page so the internal links above have somewhere to jump.</p>
+
+  <h2 id="form">3. Order form (form controls)</h2>
+  <form>
+    <p><label>Name</label><input type="text" value="Anna Karapetyan" size="30"></p>
+    <p><label>E-mail</label><input type="email" placeholder="name@example.com" size="30"></p>
+    <p><label>Plan</label><select><option>Basic</option><option selected>Pro</option></select></p>
+    <p><label>Options</label><input type="checkbox" checked> Invoice by e-mail <input type="radio" checked> Monthly <input type="radio"> Yearly</p>
+    <p><label></label><input type="submit" value="Place order"> <button type="button">Cancel</button></p>
+  </form>
+</body>
+</html>

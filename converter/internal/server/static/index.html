@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML to PDF</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --text: #1d2129; --muted: #667085;
+    --border: #d9dde3; --accent: #2f6fed; --accent-dark: #1f56c4;
+    --error-bg: #fdecec; --error: #b42318; --ok-bg: #ecfdf3; --ok: #067647;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 28px 16px 8px; text-align: center; }
+  header h1 { margin: 0; font-size: 26px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid;
+         grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 20px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 14px; background: var(--bg); padding: 4px; border-radius: 8px; }
+  .tabs button { flex: 1; border: 0; background: transparent; padding: 8px; border-radius: 6px;
+                 font: inherit; cursor: pointer; color: var(--muted); }
+  .tabs button.active { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .drop { border: 2px dashed var(--border); border-radius: 10px; padding: 32px 16px; text-align: center;
+          cursor: pointer; transition: border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: #f0f5ff; }
+  .drop strong { color: var(--accent); }
+  .drop .file { margin-top: 10px; font-weight: 600; word-break: break-all; }
+  .drop small { color: var(--muted); }
+  textarea { width: 100%; min-height: 220px; font: 13px/1.45 ui-monospace, Consolas, monospace;
+             border: 1px solid var(--border); border-radius: 8px; padding: 10px; resize: vertical; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .adv { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 14px; }
+  .adv summary { cursor: pointer; color: var(--muted); }
+  .adv input[type=password] { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+  #remoteRow.off { opacity: .5; }
+  select, input[type=number] { width: 100%; padding: 8px; border: 1px solid var(--border);
+                               border-radius: 6px; font: inherit; background: #fff; }
+  .libs { border: 0; padding: 0; margin: 14px 0 0; min-width: 0; }
+  .libs legend { font-size: 13px; color: var(--muted); padding: 0; margin-bottom: 6px; }
+  .lib-list { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+  .lib { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 6px 10px; border: 1px solid var(--border);
+         border-radius: 999px; color: var(--text); font-size: 13px; cursor: pointer; background: #fff; }
+  .lib:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, #fff); }
+  .lib.found { border-style: dashed; border-color: var(--accent); }
+  .libs small { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--text); font-size: 14px; }
+  .actions { display: flex; gap: 10px; margin-top: 18px; }
+  .btn { flex: 1; border: 0; border-radius: 8px; padding: 11px 14px; font: inherit; font-weight: 600;
+         cursor: pointer; background: var(--accent); color: #fff; text-align: center; text-decoration: none; }
+  .btn:hover { background: var(--accent-dark); }
+  .btn:disabled { opacity: .55; cursor: wait; }
+  .btn.secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn.secondary:hover { background: #e9ebef; }
+  .msg { margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 14px; display: none; }
+  .msg.error { display: block; background: var(--error-bg); color: var(--error); }
+  .msg.ok { display: block; background: var(--ok-bg); color: var(--ok); }
+  .msg.warn { display: block; background: #fffaeb; color: #93370d; }
+  .msg ul { margin: 6px 0 0; padding-left: 20px; word-break: break-all; }
+  .mainpick { margin-top: 12px; }
+  .mainpick.hidden { display: none; }
+  .preview { display: flex; flex-direction: column; min-height: 520px; }
+  .preview h2 { margin: 0 0 12px; font-size: 16px; }
+  .preview iframe { flex: 1; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+  .empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted);
+           border: 1px dashed var(--border); border-radius: 8px; text-align: center; padding: 20px; }
+  .hidden { display: none !important; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 8px 16px 28px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>HTML &rarr; PDF</h1>
+  <p>Upload an HTML file and get a PDF back. Pure Go, no external packages.</p>
+</header>
+
+<main>
+  <form id="form" class="card" autocomplete="off">
+    <div class="tabs" role="tablist">
+      <button type="button" class="active" data-tab="upload">Upload file</button>
+      <button type="button" data-tab="paste">Paste HTML</button>
+    </div>
+
+    <div id="tab-upload">
+      <div id="drop" class="drop" tabindex="0">
+        <div><strong>Choose the HTML file and the files it uses</strong> or drag them (or the whole folder) here</div>
+        <small>Select the .html together with its CSS, images and fonts, or upload one .zip — 50 MB in total</small>
+        <div id="fileName" class="file"></div>
+      </div>
+      <input id="file" name="file" type="file" multiple hidden>
+      <div id="mainPick" class="mainpick hidden">
+        <label for="main">Document to convert</label>
+        <select id="main"></select>
+      </div>
+    </div>
+
+    <div id="tab-paste" class="hidden">
+      <textarea id="html" name="html" placeholder="<h1>Hello</h1>&#10;<p>Paste any HTML here…</p>"></textarea>
+    </div>
+
+    <div class="options">
+      <div>
+        <label for="pageSize">Page size</label>
+        <select id="pageSize" name="pageSize">
+          <option value="A4" selected>A4</option>
+          <option value="Letter">Letter</option>
+          <option value="Legal">Legal</option>
+          <option value="A3">A3</option>
+          <option value="A5">A5</option>
+        </select>
+      </div>
+      <div>
+        <label for="orientation">Orientation</label>
+        <select id="orientation" name="orientation">
+          <option value="portrait" selected>Portrait</option>
+          <option value="landscape">Landscape</option>
+        </select>
+      </div>
+      <div>
+        <label for="margin">Margin (mm)</label>
+        <input id="margin" name="margin" type="number" min="5" max="50" value="15">
+      </div>
+      <div>
+        <label for="viewport" title="Lay the page out as in a browser window of this width, then scale it to the paper">Layout width</label>
+        <select id="viewport" name="viewport">
+          <option value="" selected>Paper (like printing)</option>
+          <option value="1280">Desktop · 1280px</option>
+          <option value="1024">Laptop · 1024px</option>
+          <option value="768">Tablet · 768px</option>
+          <option value="375">Mobile · 375px</option>
+        </select>
+      </div>
+    </div>
+    <fieldset class="libs" id="cssLibs">
+      <legend title="Apply bundled CSS libraries even if the page does not load them">CSS libraries</legend>
+      <div class="lib-list">
+        <label class="lib"><input type="checkbox" name="cssLib" value="tailwind"> Tailwind CSS 3</label>
+        <label class="lib"><input type="checkbox" name="cssLib" value="bootstrap5"> Bootstrap 5.3</label>
+        <label class="lib"><input type="checkbox" name="cssLib" value="bootstrap4"> Bootstrap 4.6</label>
+        <label class="lib"><input type="checkbox" name="cssLib" value="none"> No library</label>
+      </div>
+      <small id="libStatus">Nothing checked: libraries are detected from the page (several can be found).</small>
+    </fieldset>
+    <label class="check"><input type="checkbox" id="pageNumbers" name="pageNumbers" checked> Add page numbers</label>
+    <details class="adv">
+      <summary>Advanced: remote resources &amp; password protection</summary>
+      <label class="check" id="remoteRow"><input type="checkbox" id="allowRemote"> Load remote images, stylesheets and fonts (http/https)</label>
+      <div class="options">
+        <div><label for="userPassword">Open password</label><input id="userPassword" type="password" autocomplete="new-password" placeholder="none"></div>
+        <div><label for="ownerPassword">Owner password</label><input id="ownerPassword" type="password" autocomplete="new-password" placeholder="random"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="denyPrint"> Disallow printing</label>
+      <label class="check"><input type="checkbox" id="denyCopy"> Disallow copying text</label>
+    </details>
+
+    <div class="actions">
+      <button id="convert" class="btn" type="submit">Convert to PDF</button>
+      <a id="download" class="btn secondary hidden" download>Download PDF</a>
+    </div>
+    <div id="msg" class="msg"></div>
+  </form>
+
+  <section class="card preview">
+    <h2>Preview</h2>
+    <div id="empty" class="empty">The converted PDF will appear here.</div>
+    <iframe id="frame" class="hidden" title="PDF preview"></iframe>
+  </section>
+</main>
+
+<footer>Pure Go: CSS cascade, flexbox, grid, floats, positioning, tables, SVG, web fonts, gradients, @page margin boxes, encryption.</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const form = $('form'), fileInput = $('file'), drop = $('drop');
+  let mode = 'upload', pdfUrl = null;
+  let picked = []; // [{file, path}]
+
+  document.querySelectorAll('.tabs button').forEach(btn => btn.addEventListener('click', () => {
+    mode = btn.dataset.tab;
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b === btn));
+    $('tab-upload').classList.toggle('hidden', mode !== 'upload');
+    $('tab-paste').classList.toggle('hidden', mode !== 'paste');
+  }));
+
+  const isHTML = p => /\.(html?|xhtml)$/i.test(p);
+
+  // Folder drops lose their structure when handed to the file input, so
+  // drops are read through the entry API, keeping relative paths.
+  // a new document: forget the library found in the previous one
+  // CSS libraries: nothing checked = auto-detect; "No library" excludes the rest
+  const libBoxes = [...document.querySelectorAll('#cssLibs input')];
+  const libNames = { tailwind: 'Tailwind CSS 3', bootstrap5: 'Bootstrap 5.3', bootstrap4: 'Bootstrap 4.6' };
+  const libHows = { classes: 'class names', link: 'stylesheet link', script: 'Tailwind script', selected: 'checked' };
+  const checkedLibs = () => libBoxes.filter(b => b.checked).map(b => b.value);
+  function libStatus(found) {
+    const libs = checkedLibs();
+    libBoxes.forEach(b => b.parentElement.classList.toggle('found', !libs.length && !!found && found.some(f => f.lib === b.value)));
+    $('libStatus').textContent = libs.includes('none') ? 'No bundled library: only the page\'s own CSS.'
+      : libs.length ? 'Only the checked libraries are applied; detection is off.'
+      : found ? (found.length ? 'Detected: ' + found.map(f => (libNames[f.lib] || f.lib) + ' (' + (libHows[f.how] || f.how) + ')').join(', ') + '.'
+                              : 'Nothing checked and no library detected in this page.')
+      : 'Nothing checked: libraries are detected from the page (several can be found).';
+  }
+  libBoxes.forEach(b => b.addEventListener('change', () => {
+    if (b.checked) libBoxes.forEach(o => { if (o !== b && (b.value === 'none' || o.value === 'none')) o.checked = false; });
+    libStatus();
+  }));
+  const resetLib = () => libStatus();
+  $('html').addEventListener('input', resetLib);
+  function setPicked(list) {
+    resetLib();
+    // drop a common top folder ("site/index.html" -> "index.html")
+    const tops = new Set(list.map(f => f.path.includes('/') ? f.path.split('/')[0] : ''));
+    if (tops.size === 1 && !tops.has('')) {
+      const t = [...tops][0].length + 1;
+      list.forEach(f => { f.path = f.path.slice(t); });
+    }
+    picked = list.filter(f => !/(^|\/)(\.|Thumbs\.db$|desktop\.ini$)/i.test(f.path));
+    const htmls = picked.filter(f => isHTML(f.path)).map(f => f.path).sort((a, b) =>
+      (/(^|\/)index\.html?$/i.test(b) - /(^|\/)index\.html?$/i.test(a)) ||
+      (a.split('/').length - b.split('/').length) || a.localeCompare(b));
+    const sel = $('main');
+    sel.innerHTML = '';
+    htmls.forEach(p => sel.add(new Option(p, p)));
+    $('mainPick').classList.toggle('hidden', htmls.length < 2);
+    showFile();
+  }
+  function showFile() {
+    if (!picked.length) { $('fileName').textContent = ''; return; }
+    const main = $('main').value || picked[0].path;
+    const others = picked.length - 1;
+    $('fileName').textContent = main + (others ? ' + ' + others + ' other file' + (others > 1 ? 's' : '') : '');
+  }
+  $('main').addEventListener('change', showFile);
+
+  async function readEntry(entry, prefix, out) {
+    if (entry.isFile) {
+      const file = await new Promise((res, rej) => entry.file(res, rej));
+      out.push({ file, path: prefix + file.name });
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      for (;;) {
+        const batch = await new Promise((res, rej) => reader.readEntries(res, rej));
+        if (!batch.length) break;
+        for (const e of batch) await readEntry(e, prefix + entry.name + '/', out);
+      }
+    }
+  }
+
+  drop.addEventListener('click', () => fileInput.click());
+  drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+  fileInput.addEventListener('change', () => setPicked([...fileInput.files].map(file => ({ file, path: file.name }))));
+  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', async e => {
+    const entries = [...(e.dataTransfer.items || [])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+    const files = [...e.dataTransfer.files];
+    if (entries.length) {
+      const out = [];
+      try { for (const entry of entries) await readEntry(entry, '', out); } catch (_) {}
+      if (out.length) { setPicked(out); return; }
+    }
+    if (files.length) setPicked(files.map(file => ({ file, path: file.name })));
+  });
+
+  // Only send the main page and the files it (or its stylesheets) mention,
+  // so dropping a big folder uploads just what this page needs.
+  async function selection() {
+    if (picked.length === 1) return picked;
+    const main = $('main').value || (picked.find(f => isHTML(f.path)) || picked[0]).path;
+    const send = picked.filter(f => f.path === main || /\.css$/i.test(f.path));
+    let text = '';
+    for (const f of send) text += '\n' + await f.file.text();
+    text = text.toLowerCase();
+    let decoded = text;
+    try { decoded = decodeURIComponent(text.replace(/%(?![0-9a-f]{2})/g, '%25')); } catch (_) {}
+    for (const f of picked) {
+      if (send.includes(f) || isHTML(f.path)) continue;
+      const name = f.path.split('/').pop().toLowerCase();
+      if (text.includes(name) || decoded.includes(name)) send.push(f);
+    }
+    return send;
+  }
+
+  // Remote loading is only offered when the server allows it.
+  fetch('/api/config').then(r => r.json()).then(cfg => {
+    if (!cfg.allowRemote) {
+      $('allowRemote').disabled = true;
+      $('remoteRow').classList.add('off');
+      $('remoteRow').title = 'Start the server with -allow-remote to enable this';
+    }
+  }).catch(() => {});
+
+  const message = (text, kind, list) => {
+    const m = $('msg');
+    m.textContent = text;
+    if (list && list.length) {
+      const ul = document.createElement('ul');
+      list.forEach(x => { const li = document.createElement('li'); li.textContent = x; ul.appendChild(li); });
+      m.appendChild(ul);
+    }
+    m.className = 'msg ' + (kind || '');
+  };
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = new FormData();
+    if (mode === 'upload') {
+      if (!picked.length) { message('Choose an HTML or ZIP file first.', 'error'); return; }
+      for (const f of await selection()) { data.append('file', f.file, f.file.name); data.append('path', f.path); }
+      if ($('main').value) data.append('main', $('main').value);
+    } else {
+      if (!$('html').value.trim()) { message('Paste some HTML first.', 'error'); return; }
+      data.append('html', $('html').value);
+    }
+    data.append('pageSize', $('pageSize').value);
+    data.append('orientation', $('orientation').value);
+    data.append('margin', $('margin').value);
+    data.append('viewport', $('viewport').value);
+    checkedLibs().forEach(l => data.append('cssLib', l));
+    data.append('pageNumbers', $('pageNumbers').checked ? 'true' : 'false');
+    data.append('allowRemote', $('allowRemote').checked ? 'true' : 'false');
+    data.append('userPassword', $('userPassword').value);
+    data.append('ownerPassword', $('ownerPassword').value);
+    data.append('denyPrint', $('denyPrint').checked ? 'true' : 'false');
+    data.append('denyCopy', $('denyCopy').checked ? 'true' : 'false');
+
+    const btn = $('convert');
+    btn.disabled = true; btn.textContent = 'Converting…'; message('');
+    try {
+      const res = await fetch('/api/convert', { method: 'POST', body: data });
+      if (!res.ok) {
+        let err = 'Conversion failed (' + res.status + ')';
+        try { err = (await res.json()).error || err; } catch (_) {}
+        throw new Error(err);
+      }
+      const blob = await res.blob();
+      const name = (/filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '') || [])[1] || 'document.pdf';
+      // A server URL ending in the file name, so saving from the preview keeps the name.
+      let url = res.headers.get('X-Result-URL');
+      if (pdfUrl) { URL.revokeObjectURL(pdfUrl); pdfUrl = null; }
+      if (!url) url = pdfUrl = URL.createObjectURL(blob);
+      const dl = $('download');
+      dl.href = pdfUrl ? url : url + '?download=1'; dl.download = name; dl.classList.remove('hidden');
+      $('frame').src = url; $('frame').classList.remove('hidden'); $('empty').classList.add('hidden');
+      const ms = res.headers.get('X-Render-Time-Ms');
+      let done = 'Done: ' + name + ' (' + Math.max(1, Math.round(blob.size / 1024)) + ' KB' + (ms ? ', ' + ms + ' ms' : '') + ')';
+      // Which CSS libraries were applied, and how each was found
+      const found = (res.headers.get('X-CSS-Lib') || '').split(/,\s*/).filter(Boolean)
+        .map(s => { const [lib, how] = s.split(/;\s*/); return { lib, how }; });
+      if (found.length) done += ' · CSS: ' + found.map(f => libNames[f.lib] || f.lib).join(' + ');
+      libStatus(found);
+      let missing = [];
+      try { missing = JSON.parse(decodeURIComponent(res.headers.get('X-Missing-Resources') || '[]')); } catch (_) {}
+      let details = [];
+      try { details = JSON.parse(decodeURIComponent(res.headers.get('X-Missing-Details') || '[]')) || []; } catch (_) {}
+      if (details.length) missing = details.map(d => d.ref + ' — ' + d.reason);
+      if (missing.length) {
+        const remoteOff = details.some(d => d.reason === 'remote loading is off');
+        const hint = remoteOff
+          ? ($('allowRemote').disabled ? ' External links need the server started with -allow-remote.' : ' Tick "Load remote images" under Advanced to fetch external links.')
+          : '';
+        message(done + '. Some files could not be loaded, so they are missing from the PDF. Select or drop local files together with the HTML, or drop the whole folder.' + hint, 'warn', missing);
+      } else {
+        message(done, 'ok');
+      }
+    } catch (err) {
+      message(err.message, 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Convert to PDF';
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<title>CSS feature showcase — Հայերեն</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root {
+    --brand: hsl(221, 83%, 53%);
+    --muted: #6b7280;
+    --gap: 10px;
+    --radius: 6px;
+  }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; color: #1f2937; line-height: 1.45; }
+  h1 { font-size: 22pt; color: var(--brand); margin: 0 0 calc(var(--gap) / 2); font-weight: 600; }
+  h2 { font-size: 13pt; margin-top: calc(var(--gap) * 2.4); border-bottom: 2px solid var(--brand); padding-bottom: 3px; }
+  .lead { color: var(--muted); font-size: 11pt; }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+
+  /* counters + ::before */
+  body { counter-reset: section; }
+  h2::before { counter-increment: section; content: counter(section) ". "; color: var(--brand); }
+
+  /* attribute + structural selectors */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; background: var(--brand); color: white; padding: 5px 8px; font-weight: 600; }
+  td { padding: 5px 8px; border-bottom: 1px solid #e5e7eb; }
+  tbody tr:nth-child(even) td { background: #f3f6ff; }
+  td:last-child, th:last-child { text-align: right; }
+  td[data-status="paid"] { color: #047857; font-weight: 600; }
+  td[data-status^="over"] { color: #b91c1c; font-weight: 600; }
+  tr:last-child td { border-bottom: 2px solid var(--brand); }
+
+  ul.check { list-style: none; padding-left: 18px; }
+  ul.check li::before { content: "\2713  "; color: #047857; font-weight: bold; }
+  ol.roman { list-style-type: upper-roman; }
+  ol.armenian { list-style-type: lower-alpha; }
+
+  .note { background: rgba(47, 111, 237, 0.08); border-left: 4px solid var(--brand); padding: 8px 12px; margin: 12px 0; }
+  .note > strong:first-child { color: var(--brand); }
+  p:has(> em.warn) { color: #b45309; }
+  .weights span { margin-right: 10px; }
+  code { background: #eef1f6; padding: 1px 4px; border: 1px solid #d5dbe5; font-size: 90%; }
+  mark { padding: 0 2px; }
+  .w300 { font-weight: 300 } .w400 { font-weight: 400 } .w600 { font-weight: 600 } .w700 { font-weight: 700 }
+  .spaced { letter-spacing: 2px; text-transform: uppercase; font-size: 9pt; color: var(--muted); }
+  .indent { text-indent: 2em; text-align: justify; }
+  .nowrap { white-space: nowrap; }
+  sup, sub { color: var(--brand); }
+  q { font-style: italic; }
+
+  /* print-only / screen-only */
+  .screen-only { display: none; }
+  @media screen { .screen-only { display: block; } .print-only { display: none; } }
+  @media print and (min-width: 400px) { .wide-note::after { content: " (wide page)"; color: var(--muted); } }
+  @supports (display: grid) { .supports::after { content: " ✔ @supports works"; color: #047857; } }
+</style>
+</head>
+<body>
+  <h1>Բարև, աշխարհ — Hello, world</h1>
+  <p class="lead">A pure-Go HTML → PDF renderer. Armenian, Русский, Ελληνικά, and العربية letters (unshaped) come from system TrueType fonts.</p>
+  <p class="spaced">letter-spacing · text-transform · css variables</p>
+
+  <h2>Typography</h2>
+  <p class="weights"><span class="w300">Light 300</span><span class="w400">Regular 400</span><span class="w600">Semibold 600</span><span class="w700">Bold 700</span><i>Italic</i></p>
+  <p class="serif">Georgia / Times serif paragraph: Կարդալ, գրել, հաշվել — <b>bold</b> and <i>italic</i> in a serif face.</p>
+  <p class="mono">Consolas monospace: func main() { fmt.Println("Ողջույն") }</p>
+  <p class="indent">This paragraph uses text-indent and justification. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Հայաստանը լեռնային երկիր է Հարավային Կովկասում, ունի հարուստ պատմություն և մշակույթ. E = mc<sup>2</sup>, H<sub>2</sub>O, and a <q>quoted phrase</q> with generated quotes.</p>
+  <p>The <span class="nowrap">text in this span will never wrap across lines</span> even near the edge.</p>
+
+  <h2>Selectors &amp; generated content</h2>
+  <ul class="check">
+    <li>Custom check marks via <code>li::before</code></li>
+    <li>Counters number the headings automatically</li>
+    <li>Attribute selectors color the status column</li>
+  </ul>
+  <ol class="roman"><li>Upper roman</li><li>Second</li><li>Third</li></ol>
+  <div class="note"><strong>Note:</strong> semi-transparent <code>rgba()</code> background, <code>:first-child</code> and child combinator styling.</div>
+  <p>Paragraph containing a <em class="warn">warning</em> and a <mark>highlight</mark> is orange via <code>:has()</code>.</p>
+  <p class="print-only wide-note">This line is visible only in print (<code>@media</code>).</p>
+  <p class="screen-only">You should NOT see this in the PDF.</p>
+  <p class="supports">Feature query:</p>
+
+  <h2>Table with zebra rows</h2>
+  <table>
+    <thead><tr><th>Հաշիվ / Invoice</th><th>Client</th><th>Status</th><th>Amount</th></tr></thead>
+    <tbody>
+      <tr><td>INV-001</td><td>Արարատ ՍՊԸ</td><td data-status="paid">Paid</td><td>֏ 120,000</td></tr>
+      <tr><td>INV-002</td><td>Northwind</td><td data-status="overdue">Overdue</td><td>€ 2,600.00</td></tr>
+      <tr><td>INV-003</td><td>Контора Рога и Копыта</td><td data-status="paid">Paid</td><td>₽ 15 000</td></tr>
+      <tr><td>INV-004</td><td>Ελληνική Εταιρεία</td><td data-status="pending">Pending</td><td>€ 980.00</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

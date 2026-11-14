@@ -1,0 +1,15 @@
+name: Feature request
+description: A CSS feature, option or integration you need
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you need, and why?
+      description: For CSS features, an HTML example and how it looks in a browser.
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What do you do today instead?

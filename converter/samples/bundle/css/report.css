@@ -1,0 +1,15 @@
+@page {
+  size: A4; margin: 22mm 16mm 20mm;
+  @top-left { content: url(../img/logo.svg); }
+  @top-right { content: "Quarterly report"; font: 9pt Arial, sans-serif; color: #6b7280; }
+  @bottom-center { content: "Page " counter(page) " of " counter(pages); font: 9pt Arial, sans-serif; color: #6b7280; }
+}
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10pt; color: #1f2937; margin: 0; }
+h1 { margin: 0 0 4px; } h2 { margin-top: 18px; }
+.toc a { color: #4f46e5; text-decoration: none; }
+.logo { height: 46px; }
+.chart { width: 100%; }
+ul.checks { list-style-image: url(../img/check.svg); }
+form { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; }
+form label { display: inline-block; width: 90px; color: #6b7280; }
+form p { margin: 6px 0; }

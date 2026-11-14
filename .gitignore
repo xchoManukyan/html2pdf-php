@@ -1,0 +1,15 @@
+/vendor/
+/composer.lock
+/.phpunit.result.cache
+/.phpunit.cache/
+/.idea/
+/.vscode/
+# converter binaries: built with scripts/build-binaries.sh or downloaded on first use
+/bin/html2pdf-linux-*
+/bin/html2pdf-darwin-*
+/bin/html2pdf-windows-*
+/bin/*.tmp
+# converter build outputs
+/converter/html2pdf
+/converter/*.exe
+/converter/*.pdf

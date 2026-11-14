@@ -1,0 +1,11 @@
+{
+    "version": "0.1.0",
+    "files": {
+        "html2pdf-linux-amd64": { "sha256": "373812df3d4b3bd943c51bb99e23044810c3a9f6fddbd81c5d8e344cab76cc20", "size": 9445536 },
+        "html2pdf-linux-arm64": { "sha256": "d599ce95dc6dc65dbe3d41b5ac9d7c44551b0828e382317f45558b848e4753c5", "size": 8781984 },
+        "html2pdf-darwin-amd64": { "sha256": "dab9adf2209c27081dda9b244a22450629af1b4586de0186f52294d8699bbed4", "size": 9654528 },
+        "html2pdf-darwin-arm64": { "sha256": "8493fc744a9bfd5556b0c3d501a12023c4754803d76d9644ef3848798a8d8fe7", "size": 8916354 },
+        "html2pdf-windows-amd64.exe": { "sha256": "9e1cd994ece697e3e1d2caff3db19ba266d6785d0a194659d242c0b9bae8dd00", "size": 9692160 },
+        "html2pdf-windows-arm64.exe": { "sha256": "9f86e4e37ab80f9fb7b71913b1da8ec55d095eaa693781a8a51f57aab20c6ede", "size": 8782848 }
+    }
+}

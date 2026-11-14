@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Tables</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 9.5pt; color: #1f2937; margin: 0; }
+  h2 { font-size: 12pt; margin: 16px 0 6px; }
+  h2:first-child { margin-top: 0; }
+
+  /* 1. timetable: rowspan + colspan, collapsed borders */
+  .tt { border-collapse: collapse; width: 100%; }
+  .tt th, .tt td { border: 1px solid #cbd5e1; padding: 5px 6px; text-align: center; }
+  .tt thead th { background: #1e3a8a; color: white; }
+  .tt th[scope=row] { background: #eff6ff; width: 60px; }
+  .tt .math { background: #fef3c7; }
+  .tt .art { background: #dcfce7; }
+  .tt .lunch { background: repeating-linear-gradient(45deg, #f1f5f9 0 6px, #e2e8f0 6px 12px); color: #64748b; font-style: italic; }
+
+  /* 2. default separated borders with spacing */
+  .sep { border: 2px solid #64748b; border-spacing: 6px; background: #f8fafc; }
+  .sep td { border: 1px solid #94a3b8; background: white; padding: 6px 10px; border-radius: 4px; }
+
+  /* 3. zebra table with col backgrounds, caption at the bottom */
+  .zebra { border-collapse: collapse; width: 100%; }
+  .zebra caption { caption-side: bottom; font-size: 8pt; color: #6b7280; padding-top: 4px; text-align: left; }
+  .zebra th { text-align: left; border-bottom: 2px solid #111827; padding: 4px 8px; }
+  .zebra td { padding: 4px 8px; border-bottom: 1px dashed #d1d5db; }
+  .zebra tbody tr:nth-child(even) { background: #f9fafb; }
+  .zebra td:last-child, .zebra th:last-child { text-align: right; }
+  .zebra tfoot td { font-weight: bold; border-top: 2px double #111827; border-bottom: none; }
+  col.hl { background: #fef9c3; }
+
+  /* 4. fixed layout */
+  .fixed { table-layout: fixed; width: 100%; border-collapse: collapse; }
+  .fixed td { border: 1px solid #e5e7eb; padding: 4px 6px; vertical-align: top; }
+</style>
+</head>
+<body>
+  <h2>1. Timetable — rowspan &amp; colspan</h2>
+  <table class="tt">
+    <thead><tr><th></th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">09:00</th><td class="math" rowspan="2">Mathematics<br><small>double lesson</small></td><td>History</td><td class="art" rowspan="2">Art studio</td><td>Physics</td><td>English</td></tr>
+      <tr><th scope="row">10:00</th><td>Chemistry</td><td>Biology</td><td>Music</td></tr>
+      <tr><th scope="row">11:00</th><td>English</td><td colspan="2">Field trip (Tue–Thu)</td><td>Sport</td></tr>
+      <tr><th scope="row">12:00</th><td class="lunch" colspan="5">Lunch break</td></tr>
+      <tr><th scope="row">13:00</th><td>Ճարտարագիտություն</td><td>Geography</td><td colspan="2" rowspan="2">Project work<br>(Wed–Thu, two hours)</td><td>Drama</td></tr>
+      <tr><th scope="row">14:00</th><td>Economics</td><td>Latin</td><td>Free</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. Separated borders (CSS default) with border-spacing</h2>
+  <table class="sep">
+    <tr><td>Alpha</td><td>Beta</td><td>Gamma</td></tr>
+    <tr><td colspan="2">Spanning two separated cells</td><td>Delta</td></tr>
+  </table>
+
+  <h2>3. Zebra rows, column highlight, tfoot and bottom caption</h2>
+  <table class="zebra">
+    <caption>Table 3. Quarterly figures. The highlighted column comes from a &lt;col&gt; background.</caption>
+    <colgroup><col><col class="hl"><col><col></colgroup>
+    <thead><tr><th>Product</th><th>Q1</th><th>Q2</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr><td>Widgets</td><td>1,200</td><td>1,450</td><td>2,650</td></tr>
+      <tr><td>Gadgets</td><td>980</td><td>1,020</td><td>2,000</td></tr>
+      <tr><td>Doohickeys</td><td>410</td><td>530</td><td>940</td></tr>
+      <tr><td>Thingamajigs</td><td>2,310</td><td>2,105</td><td>4,415</td></tr>
+    </tbody>
+    <tfoot><tr><td>Sum</td><td>4,900</td><td>5,105</td><td>10,005</td></tr></tfoot>
+  </table>
+
+  <h2>4. table-layout: fixed</h2>
+  <table class="fixed">
+    <colgroup><col style="width: 20%"><col style="width: 50%"><col></colgroup>
+    <tr><td>20% column</td><td>50% column with a longer description that wraps inside its fixed width.</td><td>rest</td></tr>
+    <tr><td>Supercalifragilisticexpialidocious</td><td>Fixed layout ignores content when sizing columns.</td><td>✓</td></tr>
+  </table>
+</body>
+</html>

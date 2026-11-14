@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Visual effects</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; font-size: 10pt; color: #1f2937; }
+
+  .hero { border-radius: 14px; padding: 18px 22px; color: white;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+          box-shadow: 0 8px 20px rgba(99, 102, 241, .35); }
+  .hero h1 { margin: 0 0 4px; font-size: 20pt; text-shadow: 0 2px 4px rgba(0,0,0,.25); }
+  .hero p { margin: 0; opacity: .85; }
+
+  .grid { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 18px; }
+  .card { flex: 1 1 30%; border-radius: 10px; background: white; overflow: hidden;
+          box-shadow: 0 2px 6px rgba(0,0,0,.12), 0 0 0 1px rgba(0,0,0,.05); }
+  .card .head { height: 34px; }
+  .card .body { padding: 10px 12px; }
+  .card h3 { margin: 0 0 4px; font-size: 11pt; }
+  .card p { margin: 0; color: #6b7280; font-size: 9pt; }
+  .g1 { background: linear-gradient(to right, #22c55e, #14b8a6); }
+  .g2 { background: radial-gradient(circle at 30% 40%, #fde68a, #f59e0b 60%, #b45309); }
+  .g3 { background: repeating-linear-gradient(45deg, #e0e7ff 0 8px, #c7d2fe 8px 16px); }
+
+  .pills { margin-top: 18px; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 8.5pt; margin-right: 6px; }
+  .p1 { background: #dcfce7; color: #166534; }
+  .p2 { background: #fee2e2; color: #991b1b; }
+  .p3 { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; border: 1px solid #e5e7eb; }
+
+  .borders { display: flex; gap: 10px; margin-top: 18px; }
+  .borders div { flex: 1; padding: 10px; text-align: center; border-radius: 6px; }
+  .b1 { border: 2px dashed #6366f1; }
+  .b2 { border: 3px dotted #ec4899; }
+  .b3 { border: 6px double #14b8a6; }
+  .b4 { border: 6px groove #9ca3af; border-radius: 0 !important; }
+  .b5 { border: 2px solid #111; outline: 2px dashed #f59e0b; outline-offset: 3px; }
+
+  .row { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(to bottom, #60a5fa, #1d4ed8); box-shadow: 0 0 0 3px white, 0 0 0 5px #93c5fd; }
+  .ghost { opacity: .4; }
+  .inset { padding: 12px 16px; border-radius: 8px; background: #f9fafb; box-shadow: inset 0 2px 6px rgba(0,0,0,.15); }
+  .notice { margin-top: 18px; padding: 10px 14px; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0;
+            background: linear-gradient(to right, rgba(245,158,11,.15), rgba(245,158,11,0)); }
+  hr { margin: 18px 0; }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Visual effects in pure Go</h1>
+    <p>Gradients, rounded corners, shadows, opacity and border styles rendered to PDF vectors.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="head g1"></div><div class="body"><h3>Linear gradient</h3><p>to right, two stops, clipped by the rounded card.</p></div></div>
+    <div class="card"><div class="head g2"></div><div class="body"><h3>Radial gradient</h3><p>circle at 30% 40% with three stops.</p></div></div>
+    <div class="card"><div class="head g3"></div><div class="body"><h3>Repeating stripes</h3><p>repeating-linear-gradient(45deg …).</p></div></div>
+  </div>
+
+  <div class="pills">
+    <span class="pill p1">Active</span><span class="pill p2">Overdue</span><span class="pill p3">Beta</span>
+    Inline <code>border-radius</code> on code spans.
+  </div>
+
+  <div class="borders">
+    <div class="b1">dashed</div><div class="b2">dotted</div><div class="b3">double</div><div class="b4">groove</div><div class="b5">outline</div>
+  </div>
+
+  <div class="row">
+    <div class="avatar"></div>
+    <div class="inset">Inset shadow box with rounded corners</div>
+    <div class="ghost">opacity: 0.4 text</div>
+  </div>
+
+  <div class="notice"><b>Notice:</b> left border with a fading rgba gradient background.</div>
+  <hr>
+  <p style="color: rgba(31,41,55,.6)">Semi-transparent text via rgba() color.</p>
+</body>
+</html>

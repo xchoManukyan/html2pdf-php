@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Print features and transforms</title>
+<style>
+  @page { size: A4; margin: 16mm; }
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; font-size: 10pt; color: #1f2937; }
+  .row { display: flex; gap: 28px; align-items: center; margin: 24px 0 30px; }
+  .stamp { display: inline-block; border: 3px double #dc2626; color: #dc2626; font-weight: 800; font-size: 16pt;
+           padding: 4px 14px; transform: rotate(-12deg); }
+  .badge { display: inline-block; background: #4f46e5; color: white; padding: 4px 10px; border-radius: 6px;
+           transform: scale(1.4); transform-origin: left center; }
+  .ribbon { display: inline-block; background: #f59e0b; color: white; font-weight: 600; padding: 4px 18px;
+            transform: skewX(-18deg); }
+  .moved { display: inline-block; background: #dcfce7; padding: 4px 10px; transform: translate(10px, -8px) rotate(4deg); }
+  .card { break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; margin: 10px 0; background: #fafafa; }
+  h2 { font-size: 13pt; margin: 18px 0 6px; }
+  p { margin: 0 0 8px; line-height: 1.5; orphans: 3; widows: 3; text-align: justify; }
+</style>
+</head>
+<body>
+  <h2>Transforms</h2>
+  <div class="row">
+    <span class="stamp">APPROVED</span>
+    <span class="badge">scale(1.4)</span>
+    <span style="margin-left:40px" class="ribbon">skewX(-18deg)</span>
+    <span class="moved">translate + rotate</span>
+  </div>
+
+  <h2>Cards with break-inside: avoid</h2>
+  <p>Each card below is kept in one piece: when it does not fit on the rest of a page it starts on the next one.
+  Headings use break-after: avoid by default, so they are never stranded at the bottom of a page, and paragraphs here
+  use orphans: 3 and widows: 3.</p>
+  <div class="card"><b>Card 1</b><br>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</div>
+  <div class="card"><b>Card 2</b><br>Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis.</div>
+  <div class="card"><b>Card 3</b><br>Cras mattis consectetur purus sit amet fermentum. Maecenas faucibus mollis interdum.</div>
+</body>
+</html>

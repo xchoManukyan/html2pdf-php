@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Advanced SVG</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  body { font-family: Arial, sans-serif; font-size: 10pt; margin: 0; }
+  h2 { font-size: 11pt; margin: 10px 0 4px; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<h2>Markers · patterns · masks · filters</h2>
+<svg width="640" height="560" viewBox="0 0 640 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#e11d48"/>
+    </marker>
+    <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
+      <circle cx="5" cy="5" r="4" fill="#2563eb"/>
+    </marker>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="#eef2ff"/>
+      <circle cx="7" cy="7" r="3" fill="#6366f1"/>
+    </pattern>
+    <pattern id="stripes" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="10" fill="#fbbf24"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" x2="1"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient>
+    <mask id="fadeMask"><rect x="330" y="160" width="280" height="110" fill="url(#fade)"/></mask>
+    <mask id="holeMask" mask-type="alpha"><circle cx="470" cy="215" r="45" fill="black"/></mask>
+    <filter id="shadow" x="-20%" y="-20%" width="160%" height="160%">
+      <feDropShadow dx="4" dy="6" stdDeviation="4" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="blur"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="gray"><feColorMatrix type="saturate" values="0"/></filter>
+    <filter id="hue"><feColorMatrix type="hueRotate" values="180"/></filter>
+    <filter id="classic">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="3" dy="3" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.5"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <text x="20" y="22" font-size="13" font-weight="bold">Markers</text>
+  <path d="M30 120 C 80 40, 160 40, 200 110" fill="none" stroke="#e11d48" stroke-width="3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <polyline points="230,120 270,50 310,110 350,45" fill="none" stroke="#2563eb" stroke-width="2" marker-mid="url(#dot)" marker-start="url(#dot)" marker-end="url(#arrow)"/>
+  <line x1="380" y1="110" x2="520" y2="50" stroke="#111" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <text x="20" y="152" font-size="13" font-weight="bold">Patterns</text>
+  <rect x="20" y="160" width="140" height="110" rx="12" fill="url(#dots)" stroke="#6366f1"/>
+  <circle cx="240" cy="215" r="55" fill="url(#stripes)" stroke="#d97706" stroke-width="2"/>
+
+  <text x="330" y="152" font-size="13" font-weight="bold">Masks</text>
+  <rect x="330" y="160" width="280" height="110" fill="#16a34a" mask="url(#fadeMask)"/>
+  <rect x="420" y="170" width="100" height="90" fill="#ea580c" mask="url(#holeMask)"/>
+
+  <text x="20" y="312" font-size="13" font-weight="bold">Filters</text>
+  <rect x="20" y="325" width="120" height="80" rx="10" fill="#0ea5e9" filter="url(#shadow)"/>
+  <g filter="url(#blur)"><circle cx="220" cy="365" r="38" fill="#a855f7"/></g>
+  <g filter="url(#gray)"><rect x="290" y="330" width="60" height="70" fill="#ef4444"/><rect x="350" y="330" width="60" height="70" fill="#22c55e"/></g>
+  <g filter="url(#hue)"><rect x="430" y="330" width="70" height="70" fill="#3b82f6"/></g>
+  <text x="530" y="380" font-size="26" font-weight="bold" fill="#0f766e" filter="url(#classic)">Text</text>
+
+  <text x="20" y="440" font-size="11" fill="#666">drop shadow · blur · grayscale (red+green) · hue-rotate(180°) on blue · classic feMerge shadow</text>
+</svg>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{
+    "name": "xchomanukyan/html2pdf",
+    "description": "HTML to PDF for PHP with flexbox, grid, Tailwind and Bootstrap support. A dompdf-style API over a fast, self-contained converter (no Chrome, no PHP extensions).",
+    "type": "library",
+    "keywords": ["pdf", "html", "html2pdf", "html-to-pdf", "dompdf", "tailwind", "bootstrap", "flexbox", "converter"],
+    "homepage": "https://github.com/xchoManukyan/html2pdf",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Khachatur Manukyan",
+            "homepage": "https://github.com/xchoManukyan",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/xchoManukyan/html2pdf/issues",
+        "source": "https://github.com/xchoManukyan/html2pdf",
+        "security": "https://github.com/xchoManukyan/html2pdf/security/policy"
+    },
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^9.6"
+    },
+    "suggest": {
+        "ext-curl": "Faster download of the converter binary on first use (otherwise PHP's HTTPS streams with ext-openssl)",
+        "ext-mbstring": "To convert documents that are not UTF-8 (loadHtml's $encoding argument)"
+    },
+    "autoload": {
+        "psr-4": {
+            "Html2Pdf\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Html2Pdf\\Tests\\": "tests/"
+        }
+    },
+    "bin": [
+        "bin/html2pdf-install"
+    ],
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit=512M",
+        "build-binary": "sh scripts/build-binaries.sh --host"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

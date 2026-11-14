@@ -1,0 +1,49 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Downloads and verifies the converter binary, so the first conversion does
+ * not have to. Run it when deploying:
+ *
+ *   vendor/bin/html2pdf-install                         this machine's platform, into the package's bin/
+ *   vendor/bin/html2pdf-install --platform linux-amd64  another platform (e.g. building a Linux image on a Mac)
+ *   vendor/bin/html2pdf-install --dir /opt/html2pdf     another folder (then set HTML2PDF_BINARY to the file)
+ *   vendor/bin/html2pdf-install --list                  the published platforms
+ */
+
+declare(strict_types=1);
+
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php', getenv('COMPOSER_RUNTIME_BIN_DIR') . '/../autoload.php'] as $autoload) {
+    if (is_file($autoload)) {
+        require $autoload;
+        break;
+    }
+}
+if (!class_exists(Html2Pdf\BinaryInstaller::class)) {
+    fwrite(STDERR, "html2pdf-install: cannot find Composer's autoloader\n");
+    exit(1);
+}
+
+$opts = getopt('', ['platform:', 'dir:', 'list', 'help']);
+if (isset($opts['help'])) {
+    echo "usage: html2pdf-install [--platform linux-amd64] [--dir folder] [--list]\n";
+    exit(0);
+}
+try {
+    $installer = new Html2Pdf\BinaryInstaller(null, null, true);
+    if (isset($opts['list'])) {
+        echo implode("\n", $installer->platforms()), "\n";
+        exit(0);
+    }
+    $platform = isset($opts['platform']) && is_string($opts['platform']) ? $opts['platform'] : null;
+    $dir = isset($opts['dir']) && is_string($opts['dir']) ? $opts['dir'] : null;
+    $file = $installer->install($platform, $dir);
+    echo 'html2pdf converter ', $installer->version(), ' installed: ', realpath($file) ?: $file, "\n";
+    if ($platform === null) {
+        $version = (new Html2Pdf\Transport\BinaryTransport($file))->version();
+        echo "it runs: version $version\n";
+    }
+} catch (Html2Pdf\Exception\Html2PdfException $e) {
+    fwrite(STDERR, 'html2pdf-install: ' . $e->getMessage() . "\n");
+    exit(1);
+}
