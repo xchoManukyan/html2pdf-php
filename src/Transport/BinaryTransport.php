@@ -98,7 +98,7 @@ final class BinaryTransport implements TransportInterface
             }
             $descriptors = [0 => ['file', $in, 'r'], 1 => ['file', $out, 'w'], 2 => ['file', $err, 'w']];
             $environment = $env ? array_merge(getenv(), $env) : null;
-            $process = proc_open(array_merge([$this->binary], $args), $descriptors, $pipes, null, $environment, ['bypass_shell' => true]);
+            $process = proc_open(array_values(array_merge([$this->binary], $args)), $descriptors, $pipes, null, $environment, ['bypass_shell' => true]);
             if (!is_resource($process)) {
                 throw new Html2PdfException("Could not start the converter \"{$this->binary}\"");
             }

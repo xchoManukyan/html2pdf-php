@@ -299,7 +299,7 @@ final class Options
      * (started with -sign-cert and -sign-key): pass Options::SERVER_CERTIFICATE;
      * only the details are sent.
      *
-     * @param array{reason?: string, location?: string, contact?: string, name?: string} $details
+     * @param array<string, string> $details reason, location, contact and/or name
      */
     public function setSignature(?string $certificate, ?string $privateKey = null, array $details = []): self
     {
@@ -536,7 +536,7 @@ final class Options
         ];
     }
 
-    /** @param float|int $mm */
+    /** @param mixed $mm a value from a custom paper size, checked here */
     private static function millimetres($mm): string
     {
         if (!is_numeric($mm) || $mm < 10 || $mm > 9999) {

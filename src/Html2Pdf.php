@@ -54,7 +54,9 @@ final class Html2Pdf
         return (new self($options, $transport))->loadHtml($html)->render()->getPdf();
     }
 
-    /** @param Options|array<string, mixed> $options */
+    /**
+     * @param mixed $options an Options object or an array of option names and values; anything else is rejected
+     */
     public function setOptions($options): self
     {
         if (is_array($options)) {
