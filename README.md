@@ -1,6 +1,6 @@
 # html2pdf for PHP
 
-[![CI](https://github.com/xchoManukyan/html2pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/xchoManukyan/html2pdf/actions/workflows/ci.yml)
+[![CI](https://github.com/xchoManukyan/html2pdf-php/actions/workflows/ci.yml/badge.svg)](https://github.com/xchoManukyan/html2pdf-php/actions/workflows/ci.yml)
 [![Packagist](https://img.shields.io/packagist/v/xchomanukyan/html2pdf)](https://packagist.org/packages/xchomanukyan/html2pdf)
 [![PHP](https://img.shields.io/packagist/php-v/xchomanukyan/html2pdf)](composer.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)

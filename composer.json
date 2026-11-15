@@ -3,7 +3,7 @@
     "description": "HTML to PDF for PHP with flexbox, grid, Tailwind and Bootstrap support. A dompdf-style API over a fast, self-contained converter (no Chrome, no PHP extensions).",
     "type": "library",
     "keywords": ["pdf", "html", "html2pdf", "html-to-pdf", "dompdf", "tailwind", "bootstrap", "flexbox", "converter"],
-    "homepage": "https://github.com/xchoManukyan/html2pdf",
+    "homepage": "https://github.com/xchoManukyan/html2pdf-php",
     "license": "MIT",
     "authors": [
         {
@@ -13,9 +13,9 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/xchoManukyan/html2pdf/issues",
-        "source": "https://github.com/xchoManukyan/html2pdf",
-        "security": "https://github.com/xchoManukyan/html2pdf/security/policy"
+        "issues": "https://github.com/xchoManukyan/html2pdf-php/issues",
+        "source": "https://github.com/xchoManukyan/html2pdf-php",
+        "security": "https://github.com/xchoManukyan/html2pdf-php/security/policy"
     },
     "require": {
         "php": "^7.4 || ^8.0",

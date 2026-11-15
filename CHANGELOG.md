@@ -33,5 +33,5 @@ release binaries are installed on first use or with `vendor/bin/html2pdf-install
   against SHA-256 checksums shipped with the package; `vendor/bin/html2pdf-install` installs it at deploy time.
 - `HttpTransport` to use a shared converter server instead of the binary.
 
-[Unreleased]: https://github.com/xchoManukyan/html2pdf/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/xchoManukyan/html2pdf/releases/tag/v0.1.0
+[Unreleased]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/xchoManukyan/html2pdf-php/releases/tag/v0.1.0

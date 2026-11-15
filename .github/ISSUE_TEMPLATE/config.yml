@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/xchoManukyan/html2pdf/security/advisories/new
+    url: https://github.com/xchoManukyan/html2pdf-php/security/advisories/new
     about: Report security issues privately, not as a public issue.

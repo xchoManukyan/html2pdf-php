@@ -9,7 +9,7 @@ Security fixes go into the latest release. Please upgrade before reporting an is
 Please **do not open a public issue** for security problems. Problems in the converter itself (reading files,
 remote requests, the server) can also be reported to
 [html2pdf-core](https://github.com/xchoManukyan/html2pdf-core/security/advisories/new). Report them privately through GitHub:
-[Report a vulnerability](https://github.com/xchoManukyan/html2pdf/security/advisories/new).
+[Report a vulnerability](https://github.com/xchoManukyan/html2pdf-php/security/advisories/new).
 
 Include what an attacker can do, the affected version, and an HTML document or steps that show it. You will get an
 answer within a week; fixes are released as soon as they are ready and credited to you unless you prefer otherwise.
