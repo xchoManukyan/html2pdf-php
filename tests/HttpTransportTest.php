@@ -6,6 +6,7 @@ namespace Html2Pdf\Tests;
 
 use Html2Pdf\Exception\Html2PdfException;
 use Html2Pdf\Html2Pdf;
+use Html2Pdf\Options;
 use Html2Pdf\Transport\BinaryTransport;
 use Html2Pdf\Transport\HttpTransport;
 use Html2Pdf\Transport\TransportInterface;
@@ -30,7 +31,8 @@ final class HttpTransportTest extends ConversionTestCase
         fclose($socket);
         self::$url = "http://127.0.0.1:$port";
         $null = DIRECTORY_SEPARATOR === '\\' ? 'NUL' : '/dev/null';
-        $server = proc_open([(new BinaryTransport())->getBinary(), '-addr', "127.0.0.1:$port"],
+        $server = proc_open([(new BinaryTransport())->getBinary(), '-addr', "127.0.0.1:$port",
+            '-sign-cert', __DIR__ . '/fixtures/signing/test-cert.pem', '-sign-key', __DIR__ . '/fixtures/signing/test-key.pem'],
             [0 => ['file', $null, 'r'], 1 => ['file', $null, 'w'], 2 => ['file', $null, 'w']], $pipes);
         if ($server === false) {
             self::fail('the converter server could not be started');
@@ -58,6 +60,11 @@ final class HttpTransportTest extends ConversionTestCase
     protected function transport(): TransportInterface
     {
         return new HttpTransport(self::$url);
+    }
+
+    protected function signing(): Options
+    {
+        return (new Options())->setSignature(Options::SERVER_CERTIFICATE, null, ['reason' => 'Approved']);
     }
 
     public function testUnreachableServer(): void

@@ -45,7 +45,7 @@
     "scripts": {
         "test": "phpunit",
         "analyse": "phpstan analyse --memory-limit=512M",
-        "build-binary": "sh scripts/build-binaries.sh --host"
+        "build-binary": "sh scripts/update-core.sh --local ../html2pdf-core"
     },
     "config": {
         "sort-packages": true

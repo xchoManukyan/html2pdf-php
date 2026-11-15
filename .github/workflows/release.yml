@@ -1,10 +1,9 @@
 name: Release
 
-# Publishing a release: see CONTRIBUTING.md. Pushing a tag such as v0.2.0
-# builds the converter for every platform, checks that each binary is
-# byte-identical to the checksum committed in resources/binaries.json (the
-# checksums the PHP package verifies downloads against), and only then
-# creates the GitHub release with the binaries attached.
+# Pushing a tag such as v0.2.0 checks the version numbers and that
+# resources/binaries.json equals the checksums.json of the pinned
+# html2pdf-core release, then creates the GitHub release. Packagist picks up
+# the tag. See CONTRIBUTING.md.
 
 on:
   push:
@@ -13,32 +12,21 @@ on:
 permissions:
   contents: write
 
-env:
-  GO_VERSION: '1.27.3'
-
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: false
       - name: Version numbers match the tag
         run: sh scripts/check-versions.sh "${GITHUB_REF_NAME#v}"
-      - name: Converter tests
-        working-directory: converter
-        run: go test ./...
-      - name: Build all binaries and compare with resources/binaries.json
-        run: sh scripts/build-binaries.sh --check
-      - name: Checksums file
-        working-directory: bin
-        run: sha256sum html2pdf-linux-* html2pdf-darwin-* html2pdf-windows-* > SHA256SUMS
+      - name: Pinned checksums are the converter release's
+        run: |
+          core=$(sed -n 's/.*"version": *"\(.*\)".*/\1/p' resources/binaries.json)
+          curl -fsSL "https://github.com/xchoManukyan/html2pdf-core/releases/download/v$core/checksums.json" -o core.json
+          diff resources/binaries.json core.json
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           sh scripts/release-notes.sh "${GITHUB_REF_NAME#v}" > notes.md
-          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag \
-            bin/html2pdf-linux-* bin/html2pdf-darwin-* bin/html2pdf-windows-* bin/SHA256SUMS THIRD_PARTY_NOTICES.md
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag

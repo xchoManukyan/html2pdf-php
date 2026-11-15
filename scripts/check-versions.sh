@@ -1,25 +1,19 @@
 #!/usr/bin/env sh
-# Checks that every place naming the version agrees:
-# converter/cli.go, src/Html2Pdf.php, resources/binaries.json, CHANGELOG.md,
-# and that the Go toolchain pinned in converter/go.mod is the one the
-# workflows use (binaries are only reproducible with the same toolchain).
+# Checks the package version: src/Html2Pdf.php (VERSION) and CHANGELOG.md
+# agree, and resources/binaries.json pins a converter release with a
+# checksum for all six platforms.
 #
 #   scripts/check-versions.sh [expected-version]   e.g. the release tag without "v"
 set -eu
 here=$(cd "$(dirname "$0")/.." && pwd)
-go=$(sed -n 's/^const version = "\(.*\)"$/\1/p' "$here/converter/cli.go")
 php=$(sed -n "s/.*const VERSION = '\(.*\)';.*/\1/p" "$here/src/Html2Pdf.php")
-manifest=$(sed -n 's/.*"version": *"\(.*\)".*/\1/p' "$here/resources/binaries.json")
-toolchain=$(sed -n 's/^toolchain go\(.*\)$/\1/p' "$here/converter/go.mod")
-expected=${1:-$go}
+core=$(sed -n 's/.*"version": *"\(.*\)".*/\1/p' "$here/resources/binaries.json")
+expected=${1:-$php}
 status=0
-for pair in "converter/cli.go:$go" "src/Html2Pdf.php:$php" "resources/binaries.json:$manifest"; do
-  [ "${pair#*:}" = "$expected" ] || { echo "${pair%%:*} has version ${pair#*:}, expected $expected" >&2; status=1; }
-done
+[ "$php" = "$expected" ] || { echo "src/Html2Pdf.php has version $php, expected $expected" >&2; status=1; }
 grep -q "^## \[$expected\]" "$here/CHANGELOG.md" || { echo "CHANGELOG.md has no section for $expected" >&2; status=1; }
-for wf in "$here"/.github/workflows/*.yml; do
-  pinned=$(sed -n "s/^ *GO_VERSION: *'\{0,1\}\([0-9.]*\)'\{0,1\}$/\1/p" "$wf")
-  [ -z "$pinned" ] || [ "$pinned" = "$toolchain" ] || { echo "$(basename "$wf") pins Go $pinned, converter/go.mod has toolchain $toolchain" >&2; status=1; }
+for p in linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64.exe windows-arm64.exe; do
+  grep -q "\"html2pdf-$p\": { \"sha256\": \"[0-9a-f]\{64\}\"" "$here/resources/binaries.json" || { echo "resources/binaries.json has no checksum for html2pdf-$p" >&2; status=1; }
 done
-[ $status = 0 ] && echo "version $expected everywhere; Go toolchain $toolchain"
+[ $status = 0 ] && echo "package version $expected; converter $core"
 exit $status

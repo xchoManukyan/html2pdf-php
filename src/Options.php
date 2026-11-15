@@ -25,6 +25,13 @@ final class Options
     public const BOOTSTRAP4 = 'bootstrap4';
     public const NO_LIBRARY = 'none';
 
+    public const AES256 = 'aes-256';
+    public const AES128 = 'aes-128';
+    public const RC4128 = 'rc4-128';
+
+    /** setSignature() with HttpTransport: the converter server signs with its own certificate. */
+    public const SERVER_CERTIFICATE = '';
+
     private const PAPER_SIZES = ['A3', 'A4', 'A5', 'LETTER', 'LEGAL'];
     private const LIBRARIES = [self::TAILWIND, self::BOOTSTRAP5, self::BOOTSTRAP4, self::NO_LIBRARY];
 
@@ -56,6 +63,14 @@ final class Options
     private $allowModify = true;
     /** @var int */
     private $timeout = 60;
+    /** @var string */
+    private $encryption = self::AES256;
+    /** @var bool */
+    private $pdfA = false;
+    /** @var bool */
+    private $fillableForms = false;
+    /** @var array{cert: string, key: string, reason: string, location: string, contact: string, name: string}|null */
+    private $signature;
 
     /**
      * @param array<string, mixed> $options e.g. ['paperSize' => 'Letter', 'isRemoteEnabled' => true]
@@ -83,6 +98,9 @@ final class Options
             'margin' => 'marginMm',
             'csslibrary' => 'cssLibraries',
             'csslib' => 'cssLibraries',
+            'forms' => 'fillableForms',
+            'activeforms' => 'fillableForms', // mPDF: useActiveForms
+            'useactiveforms' => 'fillableForms',
         ];
         $key = strtolower(str_replace(['_', '-'], '', $name));
         $name = $aliases[$key] ?? $name;
@@ -235,6 +253,103 @@ final class Options
         return $this;
     }
 
+    /**
+     * Encryption of protected PDFs (with a password or restricted
+     * permissions): Options::AES256 (default, readable by Acrobat X+ and all
+     * current viewers), Options::AES128, or Options::RC4128 for very old readers.
+     */
+    public function setEncryption(string $method): self
+    {
+        $method = strtolower(trim($method));
+        if (!in_array($method, [self::AES256, self::AES128, self::RC4128], true)) {
+            throw new Html2PdfException("Unknown encryption \"$method\": use aes-256, aes-128 or rc4-128");
+        }
+        $this->encryption = $method;
+        return $this;
+    }
+
+    /**
+     * Write PDF/A-2b, the archival format (embedded fonts, XMP metadata, sRGB
+     * output intent). It cannot be combined with passwords or permissions,
+     * and needs fonts the converter can embed: installed fonts or @font-face.
+     */
+    public function setPdfA(bool $enabled = true): self
+    {
+        $this->pdfA = $enabled;
+        return $this;
+    }
+
+    /**
+     * Turn inputs, checkboxes, radio buttons, selects and textareas into PDF
+     * form fields people can fill in (otherwise they are printed as they look).
+     */
+    public function setFillableForms(bool $enabled = true): self
+    {
+        $this->fillableForms = $enabled;
+        return $this;
+    }
+
+    /**
+     * Sign the PDF digitally (PAdES baseline signature, SHA-256) with a
+     * certificate and its private key: PEM files, RSA or ECDSA, the key
+     * unencrypted (both may be in one file). $details: reason, location,
+     * contact, name. null removes the signature.
+     *
+     * With HttpTransport the converter server signs with its own certificate
+     * (started with -sign-cert and -sign-key): pass Options::SERVER_CERTIFICATE;
+     * only the details are sent.
+     *
+     * @param array{reason?: string, location?: string, contact?: string, name?: string} $details
+     */
+    public function setSignature(?string $certificate, ?string $privateKey = null, array $details = []): self
+    {
+        if ($certificate === null) {
+            $this->signature = null;
+            return $this;
+        }
+        $privateKey = $privateKey ?? $certificate;
+        foreach ([$certificate, $privateKey] as $file) {
+            if ($file !== '' && !is_readable($file)) {
+                throw new Html2PdfException("Cannot read the signing file \"$file\"");
+            }
+        }
+        foreach (array_keys($details) as $key) {
+            if (!in_array($key, ['reason', 'location', 'contact', 'name'], true)) {
+                throw new Html2PdfException("Unknown signature detail \"$key\": use reason, location, contact or name");
+            }
+        }
+        $this->signature = [
+            'cert' => $certificate,
+            'key' => $privateKey,
+            'reason' => (string) ($details['reason'] ?? ''),
+            'location' => (string) ($details['location'] ?? ''),
+            'contact' => (string) ($details['contact'] ?? ''),
+            'name' => (string) ($details['name'] ?? ''),
+        ];
+        return $this;
+    }
+
+    public function hasFillableForms(): bool
+    {
+        return $this->fillableForms;
+    }
+
+    /** @return array{cert: string, key: string, reason: string, location: string, contact: string, name: string}|null */
+    public function getSignature(): ?array
+    {
+        return $this->signature;
+    }
+
+    public function getEncryption(): string
+    {
+        return $this->encryption;
+    }
+
+    public function isPdfA(): bool
+    {
+        return $this->pdfA;
+    }
+
     /** Seconds a conversion may take before it is stopped. */
     public function setTimeout(int $seconds): self
     {
@@ -315,10 +430,12 @@ final class Options
      */
     public function toArguments(): array
     {
+        $this->assertConsistent();
         $args = [
             '-size', $this->paperSize,
             '-margin', self::number($this->marginMm),
             '-css', $this->cssLibraries ? implode(',', $this->cssLibraries) : 'auto',
+            '-encryption', $this->encryption,
         ];
         if ($this->orientation === self::LANDSCAPE) {
             $args[] = '-landscape';
@@ -341,7 +458,37 @@ final class Options
         if (!$this->allowModify) {
             $args[] = '-no-modify';
         }
+        if ($this->pdfA) {
+            $args[] = '-pdfa';
+        }
+        if ($this->fillableForms) {
+            $args[] = '-forms';
+        }
+        if ($this->signature !== null) {
+            if ($this->signature['cert'] === '') {
+                throw new Html2PdfException('Signing with the converter binary needs the certificate and key files');
+            }
+            array_push($args, '-sign-cert', $this->signature['cert'], '-sign-key', $this->signature['key']);
+            foreach (['reason', 'location', 'contact', 'name'] as $detail) {
+                if ($this->signature[$detail] !== '') {
+                    array_push($args, '-sign-' . $detail, $this->signature[$detail]);
+                }
+            }
+        }
         return $args;
+    }
+
+    /** Report option conflicts before converting. */
+    private function assertConsistent(): void
+    {
+        $protected = $this->userPassword !== null || $this->ownerPassword !== null
+            || !$this->allowPrint || !$this->allowCopy || !$this->allowModify;
+        if ($this->pdfA && $protected) {
+            throw new Html2PdfException('PDF/A documents cannot be encrypted: remove the password and permissions, or turn off PDF/A');
+        }
+        if ($this->pdfA && $this->fillableForms) {
+            throw new Html2PdfException('Fillable forms cannot be combined with PDF/A: turn one of them off');
+        }
     }
 
     /** @return array<string, string> environment variables with the passwords */
@@ -365,6 +512,7 @@ final class Options
      */
     public function toFormFields(): array
     {
+        $this->assertConsistent();
         return [
             'pageSize' => $this->paperSize,
             'orientation' => $this->orientation,
@@ -378,6 +526,13 @@ final class Options
             'denyPrint' => $this->allowPrint ? 'false' : 'true',
             'denyCopy' => $this->allowCopy ? 'false' : 'true',
             'denyModify' => $this->allowModify ? 'false' : 'true',
+            'encryption' => $this->encryption,
+            'pdfa' => $this->pdfA ? 'true' : 'false',
+            'forms' => $this->fillableForms ? 'true' : 'false',
+            'sign' => $this->signature !== null ? 'true' : 'false',
+            'signReason' => $this->signature['reason'] ?? '',
+            'signLocation' => $this->signature['location'] ?? '',
+            'signContact' => $this->signature['contact'] ?? '',
         ];
     }
 

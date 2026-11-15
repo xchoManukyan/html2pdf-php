@@ -9,14 +9,16 @@ use Html2Pdf\Exception\Html2PdfException;
 /**
  * Finds the converter binary for this machine and downloads it on first use.
  *
- * The binaries are published on the project's GitHub releases. Their SHA-256
- * checksums ship with the package (resources/binaries.json), so a download
- * is used only if it is exactly the binary of this package version.
+ * The binaries are the releases of the converter, html2pdf-core
+ * (https://github.com/xchoManukyan/html2pdf-core). The package pins one
+ * converter version: its SHA-256 checksums ship with the package
+ * (resources/binaries.json), so a download is used only if it is exactly
+ * that release's binary.
  *
  * Where the binary is looked for, in this order:
  *  1. the HTML2PDF_BINARY environment variable (a file you provide; not checked),
  *  2. the package's bin/ folder (put there by `vendor/bin/html2pdf-install`
- *     at deploy time, or by scripts/build-binaries.sh in a checkout),
+ *     at deploy time, or by scripts/update-core.sh --local in a checkout),
  *  3. a cache folder: HTML2PDF_BINARY_DIR, or html2pdf-VERSION in the system's
  *     temporary folder. Files there are checked against their checksum
  *     before every first use in a process, since other users may write to
@@ -28,7 +30,7 @@ use Html2Pdf\Exception\Html2PdfException;
  */
 final class BinaryInstaller
 {
-    public const DOWNLOAD_URL = 'https://github.com/xchoManukyan/html2pdf/releases/download/v{version}/{file}';
+    public const DOWNLOAD_URL = 'https://github.com/xchoManukyan/html2pdf-core/releases/download/v{version}/{file}';
 
     /** @var array<string, string> paths verified in this process */
     private static $verified = [];
@@ -132,7 +134,7 @@ final class BinaryInstaller
         $file = self::fileName($platform);
         if (!isset($this->manifest['files'][$file])) {
             throw new Html2PdfException("No converter binary is published for this platform ($file). Published: "
-                . implode(', ', $this->platforms()) . '. Build one from the source (scripts/build-binaries.sh --host) and set HTML2PDF_BINARY.');
+                . implode(', ', $this->platforms()) . '. Build one from html2pdf-core (scripts/build.sh --host) and set HTML2PDF_BINARY.');
         }
         $dir = $dir ?? $this->packageDir;
         if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {

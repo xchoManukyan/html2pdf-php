@@ -4,12 +4,8 @@
 /.phpunit.cache/
 /.idea/
 /.vscode/
-# converter binaries: built with scripts/build-binaries.sh or downloaded on first use
+# converter binaries: downloaded on first use, or installed by scripts/update-core.sh --local
 /bin/html2pdf-linux-*
 /bin/html2pdf-darwin-*
 /bin/html2pdf-windows-*
 /bin/*.tmp
-# converter build outputs
-/converter/html2pdf
-/converter/*.exe
-/converter/*.pdf

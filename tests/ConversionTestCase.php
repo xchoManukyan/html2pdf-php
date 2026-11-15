@@ -17,6 +17,13 @@ abstract class ConversionTestCase extends TestCase
 {
     abstract protected function transport(): TransportInterface;
 
+    /** Options that sign with the test certificate. */
+    protected function signing(): Options
+    {
+        $dir = __DIR__ . '/fixtures/signing/';
+        return (new Options())->setSignature($dir . 'test-cert.pem', $dir . 'test-key.pem', ['reason' => 'Approved']);
+    }
+
     /** @param Options|array<string, mixed>|null $options */
     private function pdf($options = null): Html2Pdf
     {
@@ -100,6 +107,57 @@ abstract class ConversionTestCase extends TestCase
         self::assertStringContainsString('/Encrypt', $pdf);
         $pdf = $this->pdf((new Options())->setPermissions(false))->loadHtml('<p>no printing</p>')->output();
         self::assertStringContainsString('/Encrypt', $pdf);
+    }
+
+    public function testStrongEncryptionByDefault(): void
+    {
+        $pdf = $this->pdf((new Options())->setPassword('secret'))->loadHtml('<p>x</p>')->output();
+        self::assertStringContainsString('/V 5 /R 6', $pdf, 'AES-256');
+        $pdf = $this->pdf((new Options())->setPassword('secret')->setEncryption(Options::AES128))->loadHtml('<p>x</p>')->output();
+        self::assertStringContainsString('/V 4 /R 4', $pdf, 'AES-128');
+    }
+
+    public function testPdfA(): void
+    {
+        try {
+            $pdf = $this->pdf((new Options())->setPdfA())->loadHtml('<p style="font-family: Arial, sans-serif">Archive</p>')->output();
+        } catch (ConversionException $e) {
+            self::markTestSkipped('no installed fonts to embed: ' . $e->getMessage());
+        }
+        self::assertStringContainsString('<pdfaid:part>2</pdfaid:part>', $pdf);
+        self::assertStringContainsString('/GTS_PDFA1', $pdf);
+    }
+
+    public function testFillableForms(): void
+    {
+        $html = '<form><input name="customer" value="Ada"><input type="checkbox" name="ok" checked>'
+            . '<select name="plan"><option>A</option><option selected>B</option></select><textarea name="notes">x</textarea></form>';
+        $pdf = $this->pdf((new Options())->setFillableForms())->loadHtml($html)->output();
+        self::assertStringContainsString('/AcroForm', $pdf);
+        self::assertStringContainsString('/FT /Tx /T (customer)', $pdf);
+        self::assertStringContainsString('/FT /Ch /T (plan)', $pdf);
+        self::assertSame(4, substr_count($pdf, '/Subtype /Widget'));
+        self::assertStringNotContainsString('/AcroForm', $this->pdf()->loadHtml($html)->output());
+    }
+
+    public function testSignature(): void
+    {
+        $pdf = $this->pdf($this->signing())->loadHtml('<p>Contract</p>')->output();
+        self::assertStringContainsString('/SubFilter /ETSI.CAdES.detached', $pdf);
+        self::assertStringContainsString('/Reason (Approved)', $pdf);
+        if (preg_match('~/ByteRange \[0 (\d+) (\d+) (\d+)\s*\]~', $pdf, $m) !== 1) {
+            self::fail('no signature byte range');
+        }
+        [$contents, $after, $rest] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        self::assertSame(strlen($pdf), $after + $rest, 'the signed ranges cover the whole file');
+        self::assertSame('<', $pdf[$contents]);
+    }
+
+    public function testBarcodeElement(): void
+    {
+        $result = $this->pdf()->loadHtml('<p>Ticket</p><barcode code="ABC-123" type="C128" text="1"><barcode code="https://example.com" type="QR">')->render();
+        self::assertStringStartsWith('%PDF-', $result->getPdf());
+        self::assertSame([], $result->getFailures());
     }
 
     public function testRejectsEmptyDocument(): void
