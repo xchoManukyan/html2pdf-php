@@ -133,8 +133,10 @@ $options->setEncryption(Options::AES128);    // default AES-256; AES-128 or RC4-
 **Signatures** are standard PAdES baseline signatures (CMS with SHA-256) over the whole file. The certificate and key
 are PEM files (RSA or ECDSA; the key without a password, both may be in one file). To convert a `.p12`/`.pfx`:
 `openssl pkcs12 -in signer.p12 -nodes -out signer.pem`. With `HttpTransport` the converter server signs with the
-certificate it was started with (`-sign-cert cert.pem -sign-key key.pem`), so the key stays on that server; pass
-`Options::SERVER_CERTIFICATE` instead of the file names. A self-signed certificate shows as "validity unknown" until
+certificate it was started with (`-sign-cert cert.pem -sign-key key.pem -sign-token SECRET`), so the key stays on that
+server; pass `Options::SERVER_CERTIFICATE` instead of the file names, and the secret as a header:
+`new HttpTransport($url, ['Authorization' => 'Bearer SECRET'])`. The server signs nothing without it, so others who
+can reach it cannot sign documents in your name. A self-signed certificate shows as "validity unknown" until
 the reader trusts it; use a certificate from a CA in the Adobe Approved Trust List for documents others must verify.
 
 **Fillable forms** keep the values, checked boxes, selected options, `readonly`, `required` and `maxlength` of the
@@ -156,7 +158,8 @@ $pdf = new Html2Pdf($options, new HttpTransport('http://pdf-service:8080'));
 ```
 
 The server cannot read your files, so with a base path set the package uploads the stylesheets, images and fonts the
-document refers to (inside the base path only). Keep the server on an internal network: it has no authentication.
+document refers to (inside the base path only). Keep the server on an internal network: apart from signing, it has
+no authentication. `-max-jobs N` limits the conversions it runs at once (default: the number of CPUs).
 
 ## Migrating from dompdf
 

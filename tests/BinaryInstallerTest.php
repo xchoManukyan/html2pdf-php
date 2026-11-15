@@ -87,6 +87,22 @@ final class BinaryInstallerTest extends TestCase
         self::assertMatchesRegularExpression('/^html2pdf-[a-z]+-(amd64|arm64)(\.exe)?$/', BinaryInstaller::fileName());
     }
 
+    public function testSharedTempFolderMustBePrivate(): void
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            self::markTestSkipped('the Windows temporary folder is per user');
+        }
+        $check = new \ReflectionMethod(BinaryInstaller::class, 'assertPrivateFolder');
+        $check->setAccessible(true);
+        $dir = $this->dir . '/cache';
+        $check->invoke(new BinaryInstaller(), $dir); // created private
+        self::assertSame(0700, fileperms($dir) & 0777);
+        chmod($dir, 0777); // as if another user had prepared it for everyone
+        $this->expectException(Html2PdfException::class);
+        $this->expectExceptionMessage('belongs to another user or others can write to it');
+        $check->invoke(new BinaryInstaller(), $dir);
+    }
+
     public function testPackageManifest(): void
     {
         $installer = new BinaryInstaller();

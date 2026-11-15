@@ -19,10 +19,11 @@ use Html2Pdf\Exception\Html2PdfException;
  *  1. the HTML2PDF_BINARY environment variable (a file you provide; not checked),
  *  2. the package's bin/ folder (put there by `vendor/bin/html2pdf-install`
  *     at deploy time, or by scripts/update-core.sh --local in a checkout),
- *  3. a cache folder: HTML2PDF_BINARY_DIR, or html2pdf-VERSION in the system's
- *     temporary folder. Files there are checked against their checksum
- *     before every first use in a process, since other users may write to
- *     a shared temporary folder.
+ *  3. a cache folder: HTML2PDF_BINARY_DIR, or html2pdf-VERSION-USER in the
+ *     system's temporary folder. That folder is created private (0700) and
+ *     used only while it belongs to this user and nobody else can write to
+ *     it, since other users share the temporary folder. Files there are
+ *     checked against their checksum before the first use in a process.
  *
  * Environment variables: HTML2PDF_NO_DOWNLOAD=1 forbids downloading (the
  * binary must be installed beforehand), HTML2PDF_DOWNLOAD_URL sets a mirror,
@@ -45,6 +46,8 @@ final class BinaryInstaller
     private $downloadUrl;
     /** @var bool */
     private $downloadAllowed;
+    /** @var bool the cache folder is the default one in the shared temporary folder */
+    private $sharedTemp;
 
     /**
      * @param string|null $cacheDir    default: HTML2PDF_BINARY_DIR or the temporary folder
@@ -56,8 +59,10 @@ final class BinaryInstaller
         $root = dirname(__DIR__);
         $this->manifest = self::readManifest($manifestPath ?? $root . '/resources/binaries.json');
         $this->packageDir = $root . DIRECTORY_SEPARATOR . 'bin';
-        $this->cacheDir = $cacheDir ?? (self::env('HTML2PDF_BINARY_DIR')
-            ?? sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'html2pdf-' . $this->manifest['version']);
+        $configured = $cacheDir ?? self::env('HTML2PDF_BINARY_DIR');
+        $this->sharedTemp = $configured === null;
+        $this->cacheDir = $configured
+            ?? sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'html2pdf-' . $this->manifest['version'] . '-' . self::userTag();
         $this->downloadUrl = $downloadUrl ?? (self::env('HTML2PDF_DOWNLOAD_URL') ?? self::DOWNLOAD_URL);
         $this->downloadAllowed = $downloadAllowed ?? !in_array(strtolower((string) self::env('HTML2PDF_NO_DOWNLOAD')), ['1', 'true', 'yes'], true);
     }
@@ -111,6 +116,9 @@ final class BinaryInstaller
             return $local; // installed at deploy time or built from source
         }
         $cached = $this->cacheDir . DIRECTORY_SEPARATOR . $file;
+        if ($this->sharedTemp) {
+            $this->assertPrivateFolder($this->cacheDir);
+        }
         if (is_file($cached) && $this->matches($cached, $file)) {
             return $cached;
         }
@@ -258,6 +266,40 @@ final class BinaryInstaller
         $result = [is_string($data) ? $data : false, curl_errno($ch), curl_error($ch)];
         curl_close($ch);
         return $result;
+    }
+
+    /** Distinguishes users sharing the temporary folder. */
+    private static function userTag(): string
+    {
+        if (function_exists('posix_geteuid')) {
+            return (string) posix_geteuid();
+        }
+        return substr(hash('sha256', (string) get_current_user() . '|' . __DIR__), 0, 12);
+    }
+
+    /**
+     * Makes sure a folder in the shared temporary folder is ours alone, so
+     * nobody else can replace the binary in it between the checksum check and
+     * its use. Creates it with 0700 permissions when missing.
+     */
+    private function assertPrivateFolder(string $dir): void
+    {
+        if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+            throw new Html2PdfException("Cannot create the folder \"$dir\" for the converter binary");
+        }
+        if (DIRECTORY_SEPARATOR === '\\') {
+            return; // Windows: the temporary folder is per user
+        }
+        clearstatcache(true, $dir);
+        $perms = @fileperms($dir);
+        $owner = @fileowner($dir);
+        // without the posix extension: only the owner can write (checked below), so being able to write means ours
+        $ownedByUs = function_exists('posix_geteuid') ? $owner === posix_geteuid() : is_writable($dir);
+        if (is_link($dir) || $perms === false || ($perms & 0022) !== 0 || !$ownedByUs) {
+            throw new Html2PdfException("The converter cache folder \"$dir\" belongs to another user or others can "
+                . 'write to it, so it is not used. Install the binary with vendor/bin/html2pdf-install, or set '
+                . 'HTML2PDF_BINARY_DIR to a folder only this user can write to.');
+        }
     }
 
     /**

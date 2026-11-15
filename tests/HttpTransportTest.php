@@ -32,7 +32,8 @@ final class HttpTransportTest extends ConversionTestCase
         self::$url = "http://127.0.0.1:$port";
         $null = DIRECTORY_SEPARATOR === '\\' ? 'NUL' : '/dev/null';
         $server = proc_open([(new BinaryTransport())->getBinary(), '-addr', "127.0.0.1:$port",
-            '-sign-cert', __DIR__ . '/fixtures/signing/test-cert.pem', '-sign-key', __DIR__ . '/fixtures/signing/test-key.pem'],
+            '-sign-cert', __DIR__ . '/fixtures/signing/test-cert.pem', '-sign-key', __DIR__ . '/fixtures/signing/test-key.pem',
+            '-sign-token', 'test-token'],
             [0 => ['file', $null, 'r'], 1 => ['file', $null, 'w'], 2 => ['file', $null, 'w']], $pipes);
         if ($server === false) {
             self::fail('the converter server could not be started');
@@ -59,7 +60,8 @@ final class HttpTransportTest extends ConversionTestCase
 
     protected function transport(): TransportInterface
     {
-        return new HttpTransport(self::$url);
+        // the server signs only requests that carry its token
+        return new HttpTransport(self::$url, ['Authorization' => 'Bearer test-token']);
     }
 
     protected function signing(): Options
