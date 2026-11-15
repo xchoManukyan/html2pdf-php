@@ -21,7 +21,7 @@ use Html2Pdf\Transport\TransportInterface;
  */
 final class Html2Pdf
 {
-    public const VERSION = '0.1.2';
+    public const VERSION = '0.1.3';
 
     /** @var Options */
     private $options;

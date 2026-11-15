@@ -5,6 +5,13 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.3]
+
+- Uses [html2pdf-core](https://github.com/xchoManukyan/html2pdf-core) 0.1.2: about three times faster per conversion
+  with the converter binary (an invoice took 44 ms instead of 145 ms as its own process) and far less memory per
+  process (about 10–30 MB instead of 166 MB), because fallback fonts load only when a character needs them and the list
+  of installed fonts is cached. With `HttpTransport`, the server no longer keeps a copy of each PDF.
+
 ## [0.1.2]
 
 Security fixes.
@@ -53,7 +60,8 @@ release binaries are installed on first use or with `vendor/bin/html2pdf-install
   against SHA-256 checksums shipped with the package; `vendor/bin/html2pdf-install` installs it at deploy time.
 - `HttpTransport` to use a shared converter server instead of the binary.
 
-[Unreleased]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/xchoManukyan/html2pdf-php/releases/tag/v0.1.0
