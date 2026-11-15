@@ -6,7 +6,6 @@ namespace Html2Pdf\Tests;
 
 use Html2Pdf\BinaryInstaller;
 use Html2Pdf\Exception\Html2PdfException;
-use Html2Pdf\Html2Pdf;
 use PHPUnit\Framework\TestCase;
 
 final class BinaryInstallerTest extends TestCase
@@ -91,7 +90,8 @@ final class BinaryInstallerTest extends TestCase
     public function testPackageManifest(): void
     {
         $installer = new BinaryInstaller();
-        self::assertSame(Html2Pdf::VERSION, $installer->version(), 'resources/binaries.json belongs to this version');
+        // the pinned converter release (html2pdf-core), independent of the package version
+        self::assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $installer->version());
         self::assertSame(['linux-amd64', 'linux-arm64', 'darwin-amd64', 'darwin-arm64', 'windows-amd64', 'windows-arm64'],
             $installer->platforms());
     }

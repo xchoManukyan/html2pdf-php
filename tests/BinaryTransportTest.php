@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Html2Pdf\Tests;
 
+use Html2Pdf\BinaryInstaller;
 use Html2Pdf\Exception\Html2PdfException;
 use Html2Pdf\Html2Pdf;
 use Html2Pdf\Transport\BinaryTransport;
@@ -19,7 +20,8 @@ final class BinaryTransportTest extends ConversionTestCase
     public function testBundledBinaryMatchesThePackage(): void
     {
         self::assertFileExists((new BinaryTransport())->getBinary());
-        self::assertSame(Html2Pdf::VERSION, (new BinaryTransport())->version());
+        // the binary is the converter version pinned in resources/binaries.json
+        self::assertSame((new BinaryInstaller())->version(), (new BinaryTransport())->version());
     }
 
     public function testDefaultTransportIsTheBinary(): void
