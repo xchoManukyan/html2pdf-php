@@ -16,7 +16,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Version numbers match the tag
         run: sh scripts/check-versions.sh "${GITHUB_REF_NAME#v}"
       - name: Pinned checksums are the converter release's
