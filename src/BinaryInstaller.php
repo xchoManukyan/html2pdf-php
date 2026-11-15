@@ -198,21 +198,22 @@ final class BinaryInstaller
         }
         $limit = max(0, $expectedSize) + 1024;
         if (function_exists('curl_init') && stripos($url, 'file://') !== 0) {
-            $ch = curl_init($url);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_MAXREDIRS => 5,
-                CURLOPT_CONNECTTIMEOUT => 15,
-                CURLOPT_TIMEOUT => 300,
-                CURLOPT_FAILONERROR => true,
-                CURLOPT_USERAGENT => 'html2pdf-php',
-            ]);
-            $data = curl_exec($ch);
-            $error = curl_error($ch);
-            curl_close($ch);
+            [$data, $errno, $error] = self::curlGet($url, []);
+            // An outdated CA bundle in php.ini (common in Windows PHP bundles such as
+            // Laragon or XAMPP) cannot verify GitHub's download host: try the
+            // operating system's certificate store, then Composer's bundle. The
+            // certificate is still verified, and the file by its SHA-256 checksum.
+            foreach (self::caFallbacks() as $options) {
+                if (is_string($data) || !in_array($errno, [60, 77], true)) {
+                    break;
+                }
+                [$data, $errno, $error] = self::curlGet($url, $options);
+            }
             if (!is_string($data)) {
-                throw new Html2PdfException("Could not download the converter from $url: $error");
+                throw new Html2PdfException("Could not download the converter from $url: $error"
+                    . (in_array($errno, [60, 77], true) ? '. The CA certificates PHP uses are outdated: update the file set '
+                        . 'as curl.cainfo in php.ini (https://curl.se/ca/cacert.pem), or install the binary with '
+                        . 'vendor/bin/html2pdf-install on a machine that can download it' : ''));
             }
         } else {
             $context = stream_context_create(['http' => [
@@ -231,6 +232,57 @@ final class BinaryInstaller
             throw new Html2PdfException("The download from $url is larger than expected");
         }
         return $data;
+    }
+
+    /**
+     * @param array<int, mixed> $extra curl options
+     *
+     * @return array{0: string|false, 1: int, 2: string} data, curl error number, error message
+     */
+    private static function curlGet(string $url, array $extra): array
+    {
+        $ch = curl_init($url);
+        if ($ch === false) {
+            return [false, 0, 'curl_init failed'];
+        }
+        curl_setopt_array($ch, $extra + [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT => 300,
+            CURLOPT_FAILONERROR => true,
+            CURLOPT_USERAGENT => 'html2pdf-php',
+        ]);
+        $data = curl_exec($ch);
+        $result = [is_string($data) ? $data : false, curl_errno($ch), curl_error($ch)];
+        curl_close($ch);
+        return $result;
+    }
+
+    /**
+     * Other trusted certificate sources to try when the configured CA bundle
+     * cannot verify the server.
+     *
+     * @return array<int, array<int, mixed>>
+     */
+    private static function caFallbacks(): array
+    {
+        $fallbacks = [];
+        $version = curl_version();
+        // CURLSSLOPT_NATIVE_CA (curl 7.71+): the operating system's certificate store
+        if (is_array($version) && version_compare((string) $version['version'], '7.71.0', '>=')) {
+            $fallbacks[] = [CURLOPT_SSL_OPTIONS => 16];
+        }
+        // composer/ca-bundle, present in many projects (Composer itself uses it)
+        $caBundle = 'Composer\\CaBundle\\CaBundle';
+        if (class_exists($caBundle)) {
+            $path = $caBundle::getBundledCaBundlePath();
+            if (is_string($path) && is_file($path)) {
+                $fallbacks[] = [CURLOPT_CAINFO => $path];
+            }
+        }
+        return $fallbacks;
     }
 
     /** @return array{version: string, files: array<string, array{sha256: string, size: int}>} */

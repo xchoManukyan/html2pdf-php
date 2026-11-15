@@ -5,6 +5,13 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1]
+
+- The converter download works with outdated CA certificates in php.ini (common in Windows PHP bundles such as
+  Laragon and XAMPP): it retries with the operating system's certificate store, then Composer's CA bundle. The
+  certificate is still verified, and the binary by its SHA-256 checksum. The error message explains how to fix the
+  php.ini setting when no source works.
+
 ## [0.1.0]
 
 First public release. The converter is [html2pdf-core](https://github.com/xchoManukyan/html2pdf-core) 0.1.0; its
@@ -33,5 +40,6 @@ release binaries are installed on first use or with `vendor/bin/html2pdf-install
   against SHA-256 checksums shipped with the package; `vendor/bin/html2pdf-install` installs it at deploy time.
 - `HttpTransport` to use a shared converter server instead of the binary.
 
-[Unreleased]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/xchoManukyan/html2pdf-php/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/xchoManukyan/html2pdf-php/releases/tag/v0.1.0
